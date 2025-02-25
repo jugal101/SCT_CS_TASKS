@@ -1,0 +1,45 @@
+from PIL import Image
+import numpy as np
+
+def encrypt_image(image_path, output_path, operation):
+    try:
+        # Open the image
+        image = Image.open(image_path)
+        image_data = np.array(image)
+
+        # Perform the selected operation on each pixel
+        if operation == 'swap':
+            image_data[:, 0, :], image_data[:, -1, :] = image_data[:, -1, :], image_data[:, 0, :]
+        elif operation == 'add':
+            image_data = np.clip(image_data + 100, 0, 255)  # Keep pixel values in range [0, 255]
+        elif operation == 'subtract':
+            image_data = np.clip(image_data - 100, 0, 255)
+        elif operation == 'multiply':
+            image_data = np.clip(image_data * 2, 0, 255)
+        elif operation == 'divide':
+            image_data = np.clip(image_data / 2, 0, 255)
+        else:
+            print("❌ Error: Invalid operation! Choose 'swap', 'add', 'subtract', 'multiply', or 'divide'.")
+            return
+
+        # Convert back to an image and save
+        encrypted_image = Image.fromarray(image_data.astype(np.uint8))
+        encrypted_image.save(output_path)
+        print(f"✅ Image processed and saved to: {output_path}")
+
+    except FileNotFoundError:
+        print("❌ Error: Image file not found! Check the image path.")
+    except Exception as e:
+        print(f"❌ Unexpected Error: {e}")
+
+# 🔹 User Input
+image_path = input("Enter the input image path: ").strip()
+output_path = input("Enter the output image path: ").strip()
+operation = input("Enter operation (swap/add/subtract/multiply/divide): ").strip().lower()
+
+# Validate operation
+valid_operations = ['swap', 'add', 'subtract', 'multiply', 'divide']
+if operation not in valid_operations:
+    print("❌ Error: Invalid operation! Choose 'swap', 'add', 'subtract', 'multiply', or 'divide'.")
+else:
+    encrypt_image(image_path, output_path, operation)
